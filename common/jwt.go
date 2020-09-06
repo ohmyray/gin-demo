@@ -37,3 +37,14 @@ func ReleaseToken(user model.User) (string, error)  {
 	// hash head + claims cqUUYg83mKfKbyEmiLFzFjrPNn_Mz6wz98btOZpM6bA
 	//"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjUsImV4cCI6MTU5OTk3MDQ3NCwiaWF0IjoxNTk5MzY1Njc0LCJpc3MiOiJvaG15cmF5LnRvcCIsInN1YiI6InVzZXIgdG9rZW4ifQ.cqUUYg83mKfKbyEmiLFzFjrPNn_Mz6wz98btOZpM6bA"
 }
+
+func ParseToken(tokenString string) (*jwt.Token, *Claims, error) {
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	return token, claims, err
+
+}

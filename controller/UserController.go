@@ -11,6 +11,17 @@ import (
 	"net/http"
 )
 
+func Info(ctx *gin.Context)  {
+	user, _ := ctx.Get("user")
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 1000,
+		"message": "获取用户信息成功！",
+		"data": gin.H{
+			"user":user,
+		},
+	})
+}
+
 func Login(ctx *gin.Context) {
 	// 获取参数
 	telephone := ctx.PostForm("telephone")
