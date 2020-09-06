@@ -21,7 +21,7 @@ func Login(ctx *gin.Context) {
 	common.DB.Where("telephone = ?", telephone).First(&user)
 	if user.ID == 0 {
 		ctx.JSON(http.StatusOK, gin.H{
-			"code": 2004,
+			"code":    2004,
 			"message": "用户未注册！",
 		})
 		return
@@ -29,16 +29,25 @@ func Login(ctx *gin.Context) {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
-			"code": 2005,
+			"code":    2005,
 			"message": "密码错误!",
 		})
 		return
 	}
 
-	token := "111"
+	token, err := common.ReleaseToken(user)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":    4002,
+			"message": "系统异常！",
+		})
+		log.Printf("token generate error: %v", err)
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": 1001,
+		"code":    1001,
 		"message": "登录成功！",
 		"data": gin.H{
 			"token": token,
@@ -93,7 +102,7 @@ func Register(ctx *gin.Context) {
 	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		ctx.JSON(
-		http.StatusInternalServerError,
+			http.StatusInternalServerError,
 			gin.H{
 				"code":    40001,
 				"message": "系统错误！" + err.Error(),
