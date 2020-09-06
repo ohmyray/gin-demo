@@ -11,6 +11,7 @@ const apiPreFix = "/api/v1"
 func CollectRoute(r *gin.Engine) *gin.Engine {
 
 	r.POST(apiPreFix+"/register",controller.Register)
+	r.POST(apiPreFix+"/login",controller.Login)
 
 	return r
 }
