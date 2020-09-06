@@ -13,6 +13,13 @@ import (
 
 func Info(ctx *gin.Context)  {
 	user, _ := ctx.Get("user")
+	if user == nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"message": "系统错误！！",
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 1000,
 		"message": "获取用户信息成功！",
