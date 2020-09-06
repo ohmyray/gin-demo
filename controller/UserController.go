@@ -6,29 +6,20 @@ import (
 	"github.com/ohmyray/gin-demo01/common"
 	"github.com/ohmyray/gin-demo01/dto"
 	"github.com/ohmyray/gin-demo01/model"
+	"github.com/ohmyray/gin-demo01/response"
 	"github.com/ohmyray/gin-demo01/uitl"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 )
 
-func Info(ctx *gin.Context)  {
+func Info(ctx *gin.Context) {
 	user, _ := ctx.Get("user")
 
 	if user == nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
-			"message": "系统错误！！",
-		})
+		response.Fail(ctx, nil, "系统错误!")
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 1000,
-		"message": "获取用户信息成功！",
-		"data": gin.H{
-			"user":dto.ToUserDto(user.(model.User)),
-		},
-	})
+	response.Success(ctx, gin.H{"user": dto.ToUserDto(user.(model.User))}, "获取用户信息成功！")
 }
 
 func Login(ctx *gin.Context) {
@@ -40,39 +31,24 @@ func Login(ctx *gin.Context) {
 	var user model.User
 	common.DB.Where("telephone = ?", telephone).First(&user)
 	if user.ID == 0 {
-		ctx.JSON(http.StatusOK, gin.H{
-			"code":    2004,
-			"message": "用户未注册！",
-		})
+		response.Success(ctx, nil, "用户未注册！")
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		ctx.JSON(http.StatusOK, gin.H{
-			"code":    2005,
-			"message": "密码错误!",
-		})
+		response.Success(ctx, nil, "密码错误!")
 		return
 	}
 
 	token, err := common.ReleaseToken(user)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":    4002,
-			"message": "系统异常！",
-		})
+		response.Fail(ctx, nil, "系统异常！")
 		log.Printf("token generate error: %v", err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    1001,
-		"message": "登录成功！",
-		"data": gin.H{
-			"token": token,
-		},
-	})
+	response.Success(ctx, gin.H{"token": token}, "登录成功！")
 
 }
 
@@ -90,43 +66,23 @@ func Register(ctx *gin.Context) {
 	}
 
 	if len(password) < 6 {
-		ctx.JSON(
-			http.StatusOK,
-			gin.H{
-				"code":    20001,
-				"message": "密码长度不够！",
-			})
+		response.Success(ctx, nil, "密码长度不够！")
 		return
 	}
 
 	if len(telephone) != 11 {
-		ctx.JSON(
-			http.StatusOK,
-			gin.H{
-				"code":    20002,
-				"message": "手机号长度不正确！",
-			})
+		response.Success(ctx, nil, "手机号长度不正确！")
 		return
 	}
 
 	if isTelephoneExist(DB, telephone) {
-		ctx.JSON(
-			http.StatusOK,
-			gin.H{
-				"code":    20003,
-				"message": "手机号已被注册，请勿重复注册！",
-			})
+		response.Success(ctx, nil, "手机号已被注册，请勿重复注册！")
 		return
 	}
 
 	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		ctx.JSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"code":    40001,
-				"message": "系统错误！" + err.Error(),
-			})
+		response.Fail(ctx, nil, "系统错误,err: "+err.Error())
 		return
 	}
 
@@ -138,12 +94,7 @@ func Register(ctx *gin.Context) {
 
 	DB.Create(&newUser)
 
-	ctx.JSON(
-		http.StatusOK,
-		gin.H{
-			"code":    1001,
-			"message": "注册成功！",
-		})
+	response.Success(ctx, nil, "注册成功！")
 }
 
 func isTelephoneExist(db *gorm.DB, telephone string) bool {

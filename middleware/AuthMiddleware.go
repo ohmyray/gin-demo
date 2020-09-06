@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ohmyray/gin-demo01/common"
 	"github.com/ohmyray/gin-demo01/model"
-	"net/http"
+	"github.com/ohmyray/gin-demo01/response"
 	"strings"
 )
 
@@ -15,10 +15,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// validate token format
 		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer") {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"code":    40004,
-				"message": "权限不足！",
-			})
+			response.Fail(ctx, nil,"权限不足！")
 			ctx.Abort()
 			return
 		}
@@ -27,10 +24,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, claims, err := common.ParseToken(tokenString)
 		if err != nil || !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"code":    40005,
-				"message": "权限不足！",
-			})
+			response.Fail(ctx, nil, "权限不足！")
 			ctx.Abort()
 			return
 		}
@@ -43,10 +37,11 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 用户
 		if user.ID == 0 {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"code":    5001,
-				"message": "用户不存在！",
-			})
+			//ctx.JSON(http.StatusUnauthorized, gin.H{
+			//	"code":    5001,
+			//	"message": "用户不存在！",
+			//})
+			response.Fail(ctx, nil, "用户不存在!")
 			ctx.Abort()
 			return
 		}
