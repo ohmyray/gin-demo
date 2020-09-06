@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/ohmyray/gin-demo01/common"
+	"github.com/ohmyray/gin-demo01/dto"
 	"github.com/ohmyray/gin-demo01/model"
 	"github.com/ohmyray/gin-demo01/uitl"
 	"golang.org/x/crypto/bcrypt"
@@ -13,6 +14,7 @@ import (
 
 func Info(ctx *gin.Context)  {
 	user, _ := ctx.Get("user")
+
 	if user == nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
@@ -24,7 +26,7 @@ func Info(ctx *gin.Context)  {
 		"code": 1000,
 		"message": "获取用户信息成功！",
 		"data": gin.H{
-			"user":user,
+			"user":dto.ToUserDto(user.(model.User)),
 		},
 	})
 }
