@@ -92,7 +92,11 @@ func Register(ctx *gin.Context) {
 		Telephone: telephone,
 	}
 
-	DB.Create(&newUser)
+	count := DB.Create(&newUser)
+	if count.Error != nil {
+		response.Fail(ctx, nil, "内部错误!")
+		return
+	}
 
 	response.Success(ctx, nil, "注册成功！")
 }
